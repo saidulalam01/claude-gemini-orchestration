@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets (never commit these)
+.env
+*.key
+*_api_key*
+
+# Shared memory files (these are local to your machine)
+shared-memory/AI-SHARED-LOG.md
+shared-memory/ACTIVE-HANDOFF.md
+shared-memory/RESUME-BRIEF.md
