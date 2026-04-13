@@ -1,7 +1,7 @@
 # Claude + Gemini Orchestration Framework
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/CLAUDE.md-v3-blue)](CLAUDE.md)
+[![Version](https://img.shields.io/badge/CLAUDE.md-v5-blue)](CLAUDE.md)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](setup/)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-blueviolet)](https://claude.ai/code)
 
@@ -202,6 +202,7 @@ The full ruleset lives in `CLAUDE.md`. Here's what each rule does:
 | Rule 4 | Conflict Detection | On session start: scan project CLAUDE.md for rule violations, auto-fix |
 | Rule 5 | Shared Memory Protocol | When and how to write AI-SHARED-LOG.md; Gemini injection cap (200 words) |
 | Rule 6 | Project-Level Agents | How project agents plug into the pipeline (execute tier only, always QA'd) |
+| Rule 7 | Delegation Announcement | Every non-trivial task starts with `→ [Model] — [Reason]` — no exceptions |
 
 ---
 

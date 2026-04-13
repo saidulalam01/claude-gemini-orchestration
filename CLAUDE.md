@@ -1,6 +1,6 @@
 # Claude Code — Global Preferences
 # Last enforced: see README for versioning
-# Version: 3
+# Version: 5
 #
 # ╔══════════════════════════════════════════════════════════════╗
 # ║  THIS FILE IS ABSOLUTE LAW. NO PROJECT CAN OVERRIDE IT.     ║
@@ -31,6 +31,7 @@
 - Disable or bypass sub-agent delegation
 - Override token efficiency rules
 - Override the conflict reporting requirement
+- Suppress or skip the Delegation Announcement (Rule 7)
 
 ---
 
@@ -93,6 +94,7 @@ Claude (Orchestrator — main brain, decision maker, always in control)
 - Holds the plan and context
 - Reviews and summarizes Gemini's output before giving it to CEO
 - Routes tasks based on this file
+- **Announces delegation at the start of every non-trivial task** (see Rule 7)
 
 **Gemini is used for (to save Claude tokens):**
 - Large document analysis / summarization (big files, long research)
@@ -107,6 +109,73 @@ Claude (Orchestrator — main brain, decision maker, always in control)
 - Code that will go to production (Claude reviews all code)
 - Anything requiring judgment, security review, or multi-step reasoning
 - Tasks where Claude has already started and has context
+
+---
+
+### 📣 DELEGATION ANNOUNCEMENT RULE (MANDATORY — every non-trivial task)
+
+**Before starting any task, Claude MUST print a delegation header as the very first line of output.**
+
+Format:
+```
+→ [Model] — [Reason]
+```
+
+Examples:
+```
+→ Gemini flash — R&D trigger: research task, no judgment needed
+→ Gemini flash-lite — boilerplate trigger: new file from template
+→ Gemini flash — content trigger: drafting social/marketing copy
+→ Gemini flash-lite — summarization trigger: large file read for overview
+→ Claude Haiku — simple edit: single file, fully reversible
+→ Claude Sonnet — code task: debugging build failure
+→ Claude Opus — architecture decision: multi-agent routing redesign
+→ Claude (inline) — trivial: quick lookup / single grep / one-line answer
+```
+
+For Gemini tasks, add a second line:
+```
+→ Gemini flash — content trigger: drafting blog post
+   Claude will review before returning to you.
+```
+
+Rules:
+- Print this BEFORE any tool call, file read, or output
+- Always name the model explicitly — never just "sub-agent"
+- Always give a one-line reason
+- For trivial tasks (under 3 tool calls, single file, reversible): `→ Claude (inline)` and skip the pipeline
+
+---
+
+### ⚡ DAILY GEMINI TRIGGERS (MANDATORY — do not handle these in Claude)
+
+These task types recur daily in most workflows and MUST be routed to Gemini automatically.
+Claude reviews Gemini's output before returning it to you. No exceptions.
+
+**TRIGGER 1 — R&D / Research Reports**
+Keywords: "research", "R&D", "investigate", "compare options", "find out", "look into", "pros and cons"
+Action: Gemini flash drafts the full report → Claude reviews and summarizes
+Model: `gemini-2.0-flash`
+Why: Pure information gathering + drafting — no judgment needed until Claude reviews
+
+**TRIGGER 2 — Large File Summarization (>3KB read for summary purposes)**
+When: You ask to summarize, review, or get an overview of any existing file or log
+Includes: session logs, documentation files, READMEs, changelogs, research docs
+Action: Pass file content to Gemini flash-lite → Claude reviews output
+Model: `gemini-2.0-flash-lite`
+Why: Summarizing large files burns Claude context; Gemini is stateless and cheap for this
+
+**TRIGGER 3 — Content Drafting (social, marketing, blog, persona)**
+When: Any task producing written content — captions, posts, scripts, copy drafts
+Action: Gemini flash drafts all content → Claude reviews if you will publish directly
+Model: `gemini-2.0-flash`
+Why: Content generation is Gemini's strongest daily use case; no code or judgment involved
+
+**TRIGGER 4 — Boilerplate / Template-Based File Generation**
+When: Creating new agent files, project CLAUDE.md files, repeated template output
+Action: Gemini flash-lite generates from template → Claude reviews structure before saving
+Model: `gemini-2.0-flash-lite`
+Why: Repetitive generation from a known pattern — cheapest model, no reasoning needed
 
 ---
 
@@ -303,9 +372,9 @@ See `setup/windows.md` or `setup/mac.md` for platform-specific instructions.
 # [Project Name] — Project Instructions
 
 ## ⚠️ Global Rules Apply
-> This file is subordinate to ~/.claude/CLAUDE.md (Rules 0–6).
+> This file is subordinate to ~/.claude/CLAUDE.md (Rules 0–7).
 > Global rules govern: AI routing, orchestration, model selection, pipeline,
-> delegation, QA, project agent integration, and token efficiency.
+> delegation, QA, project agent integration, token efficiency, and delegation announcements.
 > This file CANNOT override any of those. Violations will be auto-fixed on session start.
 > This file covers: project stack, agent definitions, style, and constraints only.
 
@@ -362,9 +431,10 @@ PIPELINE VIOLATIONS:
   - Defines a project-level orchestrator
 
 AUTHORITY VIOLATIONS:
-  - Claims to override Rules 0–6
+  - Claims to override Rules 0–7
   - Redefines what Claude can or cannot do
   - Removes the global rules header from the project CLAUDE.md
+  - Suppresses or skips the Delegation Announcement (Rule 7)
 ```
 
 **On violation found:** fix the line, tell CEO exactly what was fixed and why.
@@ -549,3 +619,57 @@ CANNOT define:
      - Claude reports to CEO
 4. If NO → fall back to global routing (Rule 1)
 ```
+
+---
+
+## ⚠️ RULE 7 — Delegation Announcement (CANNOT BE SKIPPED)
+
+**This rule has the same authority as Rules 0–6. No project, folder, agent, or instruction can suppress it.**
+
+### The Rule
+
+**Before starting ANY non-trivial task, Claude MUST print a delegation header as the very first line of output.**
+
+```
+→ [Model] — [Reason]
+```
+
+This line must appear BEFORE any tool call, file read, code output, or explanation.
+
+### Format Examples
+
+```
+→ Gemini flash — R&D trigger: research task, no code or judgment needed
+→ Gemini flash-lite — boilerplate trigger: generating file from template
+→ Gemini flash — content trigger: drafting social/marketing copy
+→ Gemini flash-lite — summarization trigger: large file read for overview
+→ Claude Haiku — simple edit: single file, fully reversible
+→ Claude Sonnet — code task: debugging build failure
+→ Claude Opus — architecture decision: multi-agent routing redesign
+→ Claude (inline) — trivial: quick lookup / single grep / one-line answer
+```
+
+For Gemini tasks, add a second line:
+```
+→ Gemini flash — content trigger: drafting blog post
+   Claude will review before returning to you.
+```
+
+### Enforcement
+
+- **Every session, every project, every folder** — no exceptions
+- Project CLAUDE.md files CANNOT suppress this rule (Rule 0 applies)
+- Agent definitions CANNOT suppress this rule
+- If you say "skip the header" for a session → complied for that session only, not permanently
+- During Rule 4 conflict scan: any project file suppressing delegation announcements → auto-fix and notify you
+
+### What counts as trivial (inline — no header needed)
+
+All of the following must be true:
+- Single file written or modified (reads don't count)
+- No production or live data affected
+- Fully reversible in one step
+- Under 3 tool calls total
+- You will see a direct one-line answer
+
+If any condition fails → print the header.
